@@ -1,0 +1,184 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  name        String
+  password    String?
+  avatar      String?
+  nationality String?
+  birthDate   DateTime?
+  role        Role      @default(CUSTOMER)
+  reviews     Review[]
+  owner       Owner?
+  accounts    Account[]
+  sessions    Session[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Owner {
+  id           String        @id @default(cuid())
+  userId       String        @unique
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessName String
+  places       Place[]
+  subscription Subscription?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Place {
+  id           String      @id @default(cuid())
+  name         String
+  type         PlaceType
+  description  String
+  address      String
+  city         String
+  country      String
+  lat          Float
+  lng          Float
+  phone        String?
+  website      String?
+  images       String[]
+  menuItems    MenuItem[]
+  beverages    Beverage[]
+  ownerId      String?
+  owner        Owner?      @relation(fields: [ownerId], references: [id])
+  reviews      Review[]
+  avgRating    Float       @default(0)
+  reviewCount  Int         @default(0)
+  priceRange   PriceRange  @default(MEDIUM)
+  cuisineType  String?
+  openingHours String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model MenuItem {
+  id          String   @id @default(cuid())
+  placeId     String
+  place       Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  price       Float
+  category    String
+  available   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model Beverage {
+  id          String   @id @default(cuid())
+  placeId     String
+  place       Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  price       Float
+  category    String
+  available   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model Review {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  placeId     String
+  place       Place        @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  rating      Int
+  content     String
+  status      ReviewStatus @default(PENDING)
+  flagReason  String?
+  aiAnalysis  String?
+  ownerReply  String?
+  ownerReplyAt DateTime?
+  adminNote   String?
+  visitDate   DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Subscription {
+  id         String   @id @default(cuid())
+  ownerId    String   @unique
+  owner      Owner    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  tier       String   @default("premium")
+  price      Float
+  currency   String   @default("EUR")
+  startDate  DateTime
+  endDate    DateTime
+  active     Boolean  @default(true)
+  stripeId   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// NextAuth required models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum Role {
+  CUSTOMER
+  OWNER
+  ADMIN
+}
+
+enum PlaceType {
+  RESTAURANT
+  BAR
+  CAFE
+  BISTRO
+  CLUB
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  FLAGGED
+  REJECTED
+}
+
+enum PriceRange {
+  BUDGET
+  MEDIUM
+  EXPENSIVE
+  LUXURY
+}
