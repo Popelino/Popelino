@@ -156,27 +156,25 @@ const templates: StrategyTemplate[] = [
   },
   {
     id: 11,
-    title: "Macro-Based Strategy",
-    description: "Create a trading strategy driven by macro indicators: interest rates, inflation, and economic growth.",
+    title: "Strategy #11",
+    description: "Coming soon — send the next screenshot to complete this template.",
     icon: <Zap className="w-5 h-5" />,
     color: "from-violet-500 to-purple-600",
     fields: [
-      { key: "asset", label: "Asset / Market", placeholder: "e.g. EUR/USD, Gold, S&P 500", type: "text" },
+      { key: "placeholder", label: "Placeholder", placeholder: "Template will be updated shortly...", type: "text" },
     ],
-    buildPrompt: (v) =>
-      `Create a trading strategy for ${v.asset} using macro indicators:\n- Interest rates\n- Inflation\n- Economic growth\n\nExplain:\n- How each factor affects trades\n- Entry/exit signals based on macro shifts\n- Example trades for each macro scenario`,
+    buildPrompt: () => `Template coming soon.`,
   },
   {
     id: 12,
-    title: "Alpha / Edge Detection",
-    description: "Identify underexploited market opportunities and get 2 unique strategies most traders miss.",
+    title: "Strategy #12",
+    description: "Coming soon — send the next screenshot to complete this template.",
     icon: <Calendar className="w-5 h-5" />,
     color: "from-cyan-500 to-blue-500",
     fields: [
-      { key: "market", label: "Market", placeholder: "e.g. crypto, stocks, forex", type: "select", options: ["crypto", "stocks", "forex", "commodities", "indices"] },
+      { key: "placeholder", label: "Placeholder", placeholder: "Template will be updated shortly...", type: "text" },
     ],
-    buildPrompt: (v) =>
-      `Identify underexploited opportunities in the ${v.market} market.\n\nFocus on:\n- Behavioral inefficiencies\n- Market structure gaps\n\nThen propose:\n- 2 unique strategies\n- Why most traders miss them\n- How to execute them step-by-step`,
+    buildPrompt: () => `Template coming soon.`,
   },
 ];
 
@@ -208,7 +206,7 @@ export default function TradingStrategyPage() {
   const isComplete = (t: StrategyTemplate) => {
     const v = values[t.id] ?? {};
     return t.fields
-      .filter((f) => !f.placeholder.toLowerCase().includes("optional"))
+      .filter((f) => !f.placeholder.toLowerCase().includes("optional") && !f.placeholder.toLowerCase().includes("coming soon"))
       .every((f) => (v[f.key] ?? "").trim() !== "");
   };
 
@@ -241,12 +239,14 @@ export default function TradingStrategyPage() {
         {templates.map((t) => {
           const open = activeId === t.id;
           const done = isComplete(t);
+          const pending = t.title.startsWith("Strategy #");
           return (
-            <div key={t.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all">
+            <div key={t.id} className={`bg-white rounded-2xl shadow-sm border overflow-hidden transition-all ${pending ? "border-dashed border-gray-200 opacity-60" : "border-gray-100"}`}>
               {/* Card header */}
               <button
                 className="w-full flex items-center gap-4 px-6 py-5 text-left hover:bg-gray-50 transition-colors"
-                onClick={() => setActiveId(open ? null : t.id)}
+                onClick={() => !pending && setActiveId(open ? null : t.id)}
+                disabled={pending}
               >
                 <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${t.color} text-white flex items-center justify-center shrink-0 shadow-sm`}>
                   {t.icon}
@@ -255,21 +255,28 @@ export default function TradingStrategyPage() {
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">#{t.id}</span>
                     <h2 className="font-bold text-gray-900 text-base">{t.title}</h2>
-                    {done && (
+                    {done && !pending && (
                       <span className="ml-auto mr-2 inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
                         <Check className="w-3 h-3" /> Ready
+                      </span>
+                    )}
+                    {pending && (
+                      <span className="ml-auto mr-2 inline-flex items-center gap-1 text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                        Coming soon
                       </span>
                     )}
                   </div>
                   <p className="text-sm text-gray-500 mt-0.5 truncate">{t.description}</p>
                 </div>
-                <div className="text-gray-400 shrink-0">
-                  {open ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                </div>
+                {!pending && (
+                  <div className="text-gray-400 shrink-0">
+                    {open ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                  </div>
+                )}
               </button>
 
               {/* Expanded form */}
-              {open && (
+              {open && !pending && (
                 <div className="border-t border-gray-100 px-6 py-6 space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {t.fields.map((f) => (
