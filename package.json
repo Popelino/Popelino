@@ -1,0 +1,37 @@
+{
+  "name": "youtube-automation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "auto": "tsx src/cli.ts auto",
+    "run": "tsx src/cli.ts run",
+    "ideate": "tsx src/cli.ts ideate",
+    "publish": "tsx src/cli.ts publish",
+    "analytics": "tsx src/cli.ts analytics",
+    "auth:youtube": "tsx scripts/youtube-auth.ts",
+    "studio": "remotion studio src/remotion/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.116.0",
+    "@remotion/bundler": "^4.0.240",
+    "@remotion/cli": "^4.0.240",
+    "@remotion/renderer": "^4.0.240",
+    "dotenv": "^16.4.5",
+    "ffmpeg-static": "^5.2.0",
+    "ffprobe-static": "^3.1.0",
+    "googleapis": "^144.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "remotion": "^4.0.240",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/ffprobe-static": "^2.0.3",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "tsx": "^4.19.3",
+    "typescript": "^5"
+  }
+}

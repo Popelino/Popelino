@@ -1,0 +1,81 @@
+name: YouTube automation
+
+on:
+  schedule:
+    # 06:15 UTC on Tuesdays and Fridays.
+    - cron: "15 6 * * 2,5"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Render but do not upload"
+        type: boolean
+        default: false
+
+concurrency:
+  group: youtube-automation
+  cancel-in-progress: false
+
+jobs:
+  produce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Remotion renders in headless Chromium.
+      - run: npx remotion browser ensure
+
+      - name: Produce and publish
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          FAL_API_KEY: ${{ secrets.FAL_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          CHANNEL_NAME: ${{ vars.CHANNEL_NAME }}
+          CHANNEL_TOPIC: ${{ vars.CHANNEL_TOPIC }}
+          CHANNEL_AUDIENCE: ${{ vars.CHANNEL_AUDIENCE }}
+          CHANNEL_TONE: ${{ vars.CHANNEL_TONE }}
+          VIDEO_FORMAT: ${{ vars.VIDEO_FORMAT }}
+          TARGET_DURATION_SEC: ${{ vars.TARGET_DURATION_SEC }}
+          TTS_PROVIDER: ${{ vars.TTS_PROVIDER }}
+          ELEVENLABS_VOICE_ID: ${{ vars.ELEVENLABS_VOICE_ID }}
+          IMAGE_PROVIDER: ${{ vars.IMAGE_PROVIDER }}
+          YOUTUBE_PRIVACY_STATUS: ${{ vars.YOUTUBE_PRIVACY_STATUS }}
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            npm run run -- --dry-run
+          else
+            npm run auto
+          fi
+
+      - name: Upload the rendered video
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: video
+          path: runs/**/video.mp4
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Record what was published
+        if: success() && inputs.dry_run != true
+        run: |
+          if git diff --quiet -- data/published.json; then exit 0; fi
+          git config user.name "youtube-automation"
+          git config user.email "actions@github.com"
+          git add data/published.json
+          git commit -m "chore: record published video"
+          git push
