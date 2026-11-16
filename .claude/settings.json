@@ -1,13 +1,20 @@
 {
+  "enabledPlugins": {
+    "ecc@ecc": true,
+    "godmode@godmode": true
+  },
   "extraKnownMarketplaces": {
     "ecc": {
       "source": {
         "source": "github",
         "repo": "affaan-m/ECC"
       }
+    },
+    "godmode": {
+      "source": {
+        "source": "github",
+        "repo": "NoobyGains/godmode"
+      }
     }
-  },
-  "enabledPlugins": {
-    "ecc@ecc": true
   }
 }
