@@ -1,7 +1,8 @@
 {
   "enabledPlugins": {
     "ecc@ecc": true,
-    "godmode@godmode": true
+    "godmode@godmode": true,
+    "claude-seo@agricidaniel-claude-seo": true
   },
   "extraKnownMarketplaces": {
     "ecc": {
@@ -14,6 +15,12 @@
       "source": {
         "source": "github",
         "repo": "NoobyGains/godmode"
+      }
+    },
+    "agricidaniel-claude-seo": {
+      "source": {
+        "source": "github",
+        "repo": "AgriciDaniel/claude-seo"
       }
     }
   }
